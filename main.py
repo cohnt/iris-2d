@@ -41,6 +41,7 @@ def draw():
 	ax.cla()
 	ax.set_xlim(limits[0])
 	ax.set_ylim(limits[1])
+	ax.set_aspect("equal")
 	for tri in tris:
 		ax.add_patch(Polygon(tri, color="red"))
 	if not (seed_point is None):
