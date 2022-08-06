@@ -85,7 +85,6 @@ def SeparatingHyperplanes(C, d, O):
 	ais = []
 	bis = []
 	while len(O_remaining) > 0:
-		print(len(O_remaining))
 		xs = []
 		dists = []
 		for o in O_remaining:
@@ -156,6 +155,7 @@ def optim():
 	O = tris
 
 	draw()
+	plt.pause(0.5)
 
 	iters = 0
 
