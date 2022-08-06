@@ -4,6 +4,7 @@ from matplotlib.patches import Polygon, Ellipse
 from matplotlib.transforms import Affine2D
 import alphashape
 import cvxpy as cp
+from scipy.spatial import HalfspaceIntersection
 
 np.random.seed(0)
 
@@ -41,6 +42,15 @@ def draw_ellipse(C, d):
 	points = C @ points + d.reshape(-1,1)
 	ax.plot(*(points))
 
+def draw_intersection(A, b, d):
+	ineq = np.hstack((A.T, -b))
+	hs = HalfspaceIntersection(ineq, d, incremental=False)
+	points = hs.intersections
+	centered_points = points - d
+	thetas = np.arctan2(centered_points[:,1], centered_points[:,0])
+	idxs = np.argsort(thetas)
+	ax.add_patch(Polygon(points[idxs], color="blue", alpha=0.25))
+
 def draw():
 	global seed_point, As, bs, Cs, ds
 	ax.cla()
@@ -64,6 +74,7 @@ def draw():
 			xx = np.linspace(*limits[0])
 			yy = (-w[0] / w[1]) * xx + (intercept / w[1])
 			ax.plot(xx, yy, color="blue")
+		draw_intersection(A, b, ds[-1])
 	plt.draw()
 
 def SeparatingHyperplanes(C, d, O):
