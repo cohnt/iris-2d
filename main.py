@@ -28,6 +28,11 @@ def gen_obstacles():
 		if r < 1/alpha:
 			tris.append(points[simplex])
 
+	tris.append(np.array([[0, 0], [1, 0], [0.5, -0.5]]))
+	tris.append(np.array([[1, 0], [1, 1], [1.5, 0.5]]))
+	tris.append(np.array([[1, 1], [0, 1], [0.5, 1.5]]))
+	tris.append(np.array([[0, 1], [0, 0], [-0.5, 0.5]]))
+
 	return tris
 
 def draw_ellipse(C, d):
