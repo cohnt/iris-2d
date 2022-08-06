@@ -17,6 +17,9 @@ tolerance = 0.00001
 limits = [[0, 1], [0, 1]]
 max_iters = 10
 
+regions = []
+current_region = []
+
 def gen_obstacles():
 	n_points = 200
 	alpha = 25.
@@ -43,16 +46,18 @@ def draw_ellipse(C, d):
 	ax.plot(*(points))
 
 def draw_intersection(A, b, d):
+	global current_region
 	ineq = np.hstack((A.T, -b))
 	hs = HalfspaceIntersection(ineq, d, incremental=False)
 	points = hs.intersections
 	centered_points = points - d
 	thetas = np.arctan2(centered_points[:,1], centered_points[:,0])
 	idxs = np.argsort(thetas)
-	ax.add_patch(Polygon(points[idxs], color="blue", alpha=0.25))
+	current_region = points[idxs]
+	ax.add_patch(Polygon(current_region, color="blue", alpha=0.25))
 
 def draw():
-	global seed_point, As, bs, Cs, ds
+	global seed_point, As, bs, Cs, ds, regions
 	ax.cla()
 	ax.set_xlim(limits[0])
 	ax.set_ylim(limits[1])
@@ -75,6 +80,10 @@ def draw():
 			yy = (-w[0] / w[1]) * xx + (intercept / w[1])
 			ax.plot(xx, yy, color="blue")
 		draw_intersection(A, b, ds[-1])
+	for region in regions:
+		plt.plot(region[:,0], region[:,1], color="green", alpha=0.5)
+		plt.plot(region[[0,-1],0], region[[0,-1],1], color="green", alpha=0.5)
+		ax.add_patch(Polygon(region, color="green", alpha=0.25))
 	plt.draw()
 
 def SeparatingHyperplanes(C, d, O):
@@ -143,7 +152,7 @@ def InscribedEllipsoid(A, b):
 	return C.value, d.value
 
 def optim():
-	global As, bs, Cs, ds
+	global As, bs, Cs, ds, seed_point, regions, current_region
 	As = []
 	bs = []
 	Cs = []
@@ -155,7 +164,7 @@ def optim():
 	O = tris
 
 	draw()
-	plt.pause(0.5)
+	plt.pause(0.001)
 
 	iters = 0
 
@@ -167,14 +176,14 @@ def optim():
 		bs.append(b)
 
 		draw()
-		plt.pause(0.5)
+		plt.pause(0.001)
 
 		C, d = InscribedEllipsoid(As[-1], bs[-1])
 		Cs.append(C)
 		ds.append(d)
 
 		draw()
-		plt.pause(0.5)
+		plt.pause(0.001)
 
 		iters += 1
 
@@ -185,6 +194,14 @@ def optim():
 			break
 
 	print("Done")
+	As = []
+	bs = []
+	Cs = []
+	ds = []
+	seed_point = None
+	regions.append(current_region)
+	draw()
+	plt.pause(0.001)
 
 def onmousepress(event):
 	global A, b, C, d
