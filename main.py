@@ -6,7 +6,7 @@ import alphashape
 import cvxpy as cp
 from scipy.spatial import HalfspaceIntersection
 
-np.random.seed(0)
+# np.random.seed(0)
 
 seed_point = None
 As = []
