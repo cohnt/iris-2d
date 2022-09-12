@@ -17,6 +17,8 @@ tolerance = 0.00001
 limits = [[0, 1], [0, 1]]
 max_iters = 10
 
+frame_time = 0.25
+
 regions = []
 current_region = []
 
@@ -159,7 +161,7 @@ def optim():
 	O = tris
 
 	draw()
-	plt.pause(0.001)
+	plt.pause(frame_time)
 
 	iters = 0
 
@@ -171,14 +173,14 @@ def optim():
 		bs.append(b)
 
 		draw()
-		plt.pause(0.001)
+		plt.pause(frame_time)
 
 		C, d = InscribedEllipsoid(As[-1], bs[-1])
 		Cs.append(C)
 		ds.append(d)
 
 		draw()
-		plt.pause(0.001)
+		plt.pause(frame_time)
 
 		iters += 1
 
@@ -196,7 +198,7 @@ def optim():
 	seed_point = None
 	regions.append(current_region)
 	draw()
-	plt.pause(0.001)
+	plt.pause(frame_time)
 
 def onmousepress(event):
 	global A, b, C, d
