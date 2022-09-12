@@ -94,14 +94,9 @@ def SeparatingHyperplanes(C, d, O):
 	ais = []
 	bis = []
 	while len(O_remaining) > 0:
-		xs = []
-		dists = []
-		for o in O_remaining:
-			x, dist = ClosestPointOnObstacle(C, C_inv, d, o)
-			xs.append(x)
-			dists.append(dist)
-		best_idx = np.argmin(dists)
-		x_star = xs[best_idx]
+		obs_dists = np.array([np.min([np.linalg.norm(corner - d) for corner in o]) for o in O_remaining])
+		best_idx = np.argmin(obs_dists)
+		x_star, _ = ClosestPointOnObstacle(C, C_inv, d, O_remaining[best_idx])
 		ai, bi = TangentPlane(C, C_inv2, d, x_star)
 		ais.append(ai)
 		bis.append(bi)
