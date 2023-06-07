@@ -5,6 +5,7 @@ from matplotlib.transforms import Affine2D
 import alphashape
 import cvxpy as cp
 from scipy.spatial import HalfspaceIntersection
+from pydrake.all import MathematicalProgram, Solve, eq
 
 # np.random.seed(0)
 
@@ -126,16 +127,16 @@ def ClosestPointOnObstacle(C, C_inv, d, o):
 	v_tildes = C_inv @ (o - d).T
 	n = 2
 	m = len(o)
-	x_tilde = cp.Variable(n)
-	w = cp.Variable(m)
-	prob = cp.Problem(cp.Minimize(cp.sum_squares(x_tilde)), [
-		v_tildes @ w == x_tilde,
-		w @ np.ones(m) == 1,
-		w >= 0
-	])
-	prob.solve()
-	x_tilde_star = x_tilde.value
-	dist = np.sqrt(prob.value) - 1
+	prog = MathematicalProgram()
+	x_tilde = prog.NewContinuousVariables(n)
+	w = prog.NewContinuousVariables(m)
+	prog.AddQuadraticCost(np.eye(n), np.zeros(n), x_tilde)
+	prog.AddLinearConstraint(eq(v_tildes @ w, x_tilde))
+	prog.AddLinearEqualityConstraint(np.ones((1, m)), np.ones(1), w)
+	prog.AddBoundingBoxConstraint(np.full(m, 0), np.full(m, np.inf), w)
+	result = Solve(prog)
+	x_tilde_star = result.GetSolution(x_tilde)
+	dist = np.sqrt(2 * result.get_optimal_cost()) - 1
 	x_star = C @ x_tilde_star + d
 	return x_star, dist
 
