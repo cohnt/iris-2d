@@ -5,7 +5,7 @@ from matplotlib.transforms import Affine2D
 import alphashape
 import cvxpy as cp
 from scipy.spatial import HalfspaceIntersection
-from pydrake.all import MathematicalProgram, Solve, eq
+from pydrake.all import MathematicalProgram, Solve, eq, le, HPolyhedron
 
 # np.random.seed(0)
 
@@ -146,16 +146,9 @@ def TangentPlane(C, C_inv2, d, x_star):
 	return a, b
 
 def InscribedEllipsoid(A, b):
-	n = 2
-	C = cp.Variable((n,n), symmetric=True)
-	d = cp.Variable(n)
-	constraints = [C >> 0]
-	constraints += [
-		cp.atoms.norm2(ai.T @ C) + (ai.T @ d) <= bi for ai, bi in zip(A.T, b)
-	]
-	prob = cp.Problem(cp.Maximize(cp.atoms.log_det(C)), constraints)
-	prob.solve()
-	return C.value, d.value
+	hpoly = HPolyhedron(A.T, b)
+	ellipsoid = hpoly.MaximumVolumeInscribedEllipsoid()
+	return np.linalg.inv(ellipsoid.A()), ellipsoid.center()
 
 def optim():
 	global As, bs, Cs, ds, seed_point, regions, current_region
